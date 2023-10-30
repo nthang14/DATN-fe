@@ -1,0 +1,9 @@
+{
+  "hooks": {
+    "pre-commit": "lint-staged",
+    "pre-push": "npm test"
+  },
+  "env": {
+    "HUSKY_GIT_PARAMS": "0"
+  }
+}

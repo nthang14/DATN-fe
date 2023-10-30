@@ -1,0 +1,56 @@
+{
+  "common": {
+    "projectName": "DATN",
+    "navigation": "Management System",
+
+    "button": {
+      "login": "Login",
+      "submit": "Submit",
+      "cancel": "Cancel",
+      "back": "Back",
+      "upload_image": "Upload Image",
+      "choose_file": "Choose File To Upload",
+      "save": "Save",
+      "add": "New",
+      "newFolder": "New Folders",
+      "fileUpload": "File Upload"
+    },
+    "paging": "{range1} to {range2} out of items",
+    "paging_with_total": "{range1} to {range2} out of {total} items",
+    "messages": {
+      "msg001input": "Please enter {field}.",
+      "msg001select": "Please select {field}.",
+      "msg002": "The information provided is incorrect. Please try again.",
+      "msg002email": "The email do not exist in the system. Please try again.",
+      "msg003": "Invalid {field} format. Please try again.",
+      "msg004": "No data to display.",
+      "msg005": "Login Successful!",
+      "msg006": "Do you really want to logout?",
+      "msg015": "Please select an image to upload.",
+      "require_img": "Please select an image to upload."
+    }
+  },
+  "login": {
+    "title": "Member Login",
+    "sub_title": "Please enter username and password for login",
+    "payload": {
+      "username": "Username",
+      "password": "Password"
+    },
+    "button": "Login",
+    "logout": "Log Out",
+    "register": "Create your account"
+  },
+  "nav": {
+    "myDrive": "My Drives",
+    "sharedDrive": "Shared Drives"
+  },
+  "dialog": {
+    "upload_image": {
+      "title": "Select Image",
+      "upload_image": "Upload Image",
+      "content": "Drag and drop to upload here",
+      "description": "File size no more than 3MB"
+    }
+  }
+}

@@ -1,0 +1,36 @@
+.logo {
+  a {
+    display: inline-block;
+    line-height: 0;
+
+    img {
+      max-width: 100%;
+    }
+  }
+}
+
+.main-menu {
+  list-style: none;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+
+  li {
+    a {
+      display: inline-block;
+      padding: 15px 20px;
+      background: #1e3f60;
+      color: #fff;
+      text-transform: capitalize;
+      border-right: 1px solid #ccc;
+    }
+
+    &:last-child {
+      a {
+        border-right: none;
+      }
+    }
+  }
+}

@@ -1,0 +1,45 @@
+.pni-button {
+  padding: 0px 15px;
+  text-align: center;
+  font-weight: 400;
+  color: #fff;
+}
+
+.btn-area {
+  height: 88px;
+  width: 100%;
+  background: #ffffff;
+}
+
+.btn {
+  border-radius: 24px!important;
+  width: 140px;
+  text-transform: none!important;
+  padding: 0!important;
+  height: 56px;
+  font-weight: 500;
+  min-width: unset!important;
+}
+
+.logout-btn:hover {
+  background-color: #fff !important;
+  .capitalize {
+    color: #64B334;
+  }
+  svg path {
+    fill: #64B334;
+  }
+}
+
+.logout-btn:active {
+  background-color: #F2F9ED !important;
+}
+
+.icon-action {
+  display: flex;
+  width: 28px;
+  height: 28px;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}

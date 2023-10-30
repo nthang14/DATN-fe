@@ -1,0 +1,22 @@
+version: "3.7"
+
+services: 
+  frontend:
+    container_name: pni_frontend
+    image: 422520630625.dkr.ecr.ap-northeast-1.amazonaws.com/pni-frontend
+    # build:
+    #   context: .
+    #   dockerfile: docker/Dockerfile
+    ports:
+      - 3000:3000
+    # volumes:
+      # - .:/usr/src/pni
+      # - /usr/src/pni/node_modules
+      # - /usr/src/pni/.next
+    networks:
+       - ${NETWORK}
+
+networks:
+  pni-network:
+    driver: bridge
+    name: ${NETWORK}

@@ -1,0 +1,175 @@
+stages:
+  - linting
+  - sonar
+  - build
+  - deploy
+
+image: docker:latest
+variables:
+  DOCKER_HOST: tcp://localhost:2375
+  DOCKER_TLS_CERTDIR: ''
+services:
+  - docker:dind
+
+.before_script_template:
+  before_script:
+    - apk add --update --no-cache nodejs npm yarn
+    - apk add --update --no-cache python3 && ln -sf python3 /usr/bin/python
+    - python3 -m ensurepip
+    - pip3 install awscli
+    - 'command -v ssh-agent >/dev/null || ( apk add --update openssh )'
+    - eval $(ssh-agent -s)
+    # - echo "$SSH_PRIVATE_KEY " | tr -d '\r' | ssh-add -
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    # - ssh-keyscan $SSH_IP_SERVER  >> ~/.ssh/known_hosts
+    - echo "$SSH_PRIVATE_KEY " > ~/.ssh/server.pem
+    - echo "$SSH_PRIVATE_KEY_BASTION " > ~/.ssh/bastion.pem
+    - chmod 400 ~/.ssh/bastion.pem
+    - chmod 400 ~/.ssh/server.pem
+    - echo "$CONFIG" >> ~/.ssh/config
+    # - chmod 644 ~/.ssh/known_hosts
+
+lint-commit-msg:
+  stage: linting
+  extends: .before_script_template
+  tags:
+    - vmogroup
+  script:
+    - npm install
+    - echo "$CI_COMMIT_MESSAGE" | npx commitlint
+
+lint-code:
+  stage: linting
+  extends: .before_script_template
+  tags:
+    - vmogroup
+  script:
+    - npm install
+    - npm run lint:check
+
+sonarqube-check:
+  image:
+    name: sonarsource/sonar-scanner-cli:latest
+    entrypoint: [""]
+  stage: sonar
+  tags:
+    - vmogroup
+  variables:
+    SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"
+    GIT_DEPTH: "0"
+  cache:
+    key: "${CI_JOB_NAME}"
+    paths:
+      - .sonar/cache
+  script:
+    - sonar-scanner
+  allow_failure: false
+
+web:build-dev:
+  stage: build
+  extends: .before_script_template
+  only:
+    - develop
+  tags:
+    - vmogroup
+  variables:
+    AWS_PROFILE: vmo
+  script:
+    - echo $CI_COMMIT_SHORT_SHA
+    - echo $ECR_REPO_PROD
+    - cat $env_PROD >> .env
+    - cat .env
+    - echo Logging in to Amazon ECR...
+    - aws ecr get-login-password --region ap-northeast-1 | docker login --username AWS --password-stdin 422520630625.dkr.ecr.ap-northeast-1.amazonaws.com
+    - echo Build started on `date`
+    - docker build -t pni_frontend . -f docker/Dockerfile
+    - docker tag pni_frontend $ECR_REPO_PROD:latest
+    - echo Build completed on `date`
+    - echo Pushing the Docker image...
+    - docker push $ECR_REPO_PROD:latest
+
+web:build-test:
+  stage: build
+  extends: .before_script_template
+  only:
+    - test
+  tags:
+    - vmogroup
+  variables:
+    AWS_PROFILE: vmo
+  script:
+    - echo $CI_COMMIT_SHORT_SHA
+    - echo $ECR_REPO_TEST
+    - cat $env_TEST >> .env
+    - cat .env
+    - echo Logging in to Amazon ECR...
+    - aws ecr get-login-password --region ap-northeast-1 | docker login --username AWS --password-stdin 422520630625.dkr.ecr.ap-northeast-1.amazonaws.com
+    - echo Build started on `date`
+    - docker build -t pni_frontend . -f docker/Dockerfile
+    - docker tag pni_frontend $ECR_REPO_TEST:latest
+    - echo Build completed on `date`
+    - echo Pushing the Docker image...
+    - docker push $ECR_REPO_TEST:latest
+
+web:build-uat:
+  stage: build
+  extends: .before_script_template
+  only:
+    - uat
+  tags:
+    - vmogroup
+  variables:
+    AWS_PROFILE: vmo
+  script:
+    - echo $CI_COMMIT_SHORT_SHA
+    - echo $ECR_REPO_UAT
+    - cat $env_UAT >> .env
+    - cat .env
+    - echo Logging in to Amazon ECR...
+    - aws ecr get-login-password --region ap-northeast-1 | docker login --username AWS --password-stdin 422520630625.dkr.ecr.ap-northeast-1.amazonaws.com
+    - echo Build started on `date`
+    - docker build -t pni_frontend . -f docker/Dockerfile
+    - docker tag pni_frontend $ECR_REPO_UAT:latest
+    - echo Build completed on `date`
+    - echo Pushing the Docker image...
+    - docker push $ECR_REPO_UAT:latest
+
+web:deploy-dev:
+  stage: deploy
+  extends: .before_script_template
+  only:
+    - develop
+  tags:
+    - vmogroup
+  variables:
+    AWS_PROFILE: vmo
+  script:
+    - ssh -tt -o StrictHostKeyChecking=no -i ~/.ssh/server.pem $SSH_USER@$SSH_IP_SERVER -J jump-host "aws ecr get-login-password --region ap-northeast-1 | docker login --username AWS --password-stdin 422520630625.dkr.ecr.ap-northeast-1.amazonaws.com && cd /home/developer/pni-fe && git pull && docker-compose pull && docker rm -f pni_frontend && docker-compose up -d"
+    - ssh -tt -o StrictHostKeyChecking=no -i ~/.ssh/server.pem $SSH_USER@$SSH_IP_SERVER -J jump-host "yes | docker image prune --filter 'dangling=true'"
+
+web:deploy-test:
+  stage: deploy
+  extends: .before_script_template
+  only:
+    - test
+  tags:
+    - vmogroup
+  variables:
+    AWS_PROFILE: vmo
+  script:
+    - ssh -tt -o StrictHostKeyChecking=no -i ~/.ssh/server.pem $SSH_USER@$SSH_IP_SERVER -J jump-host "aws ecr get-login-password --region ap-northeast-1 | docker login --username AWS --password-stdin 422520630625.dkr.ecr.ap-northeast-1.amazonaws.com && cd /home/developer/test-env/pni-fe-test && git pull && docker-compose -f docker-compose-test.yml pull && docker rm -f pni_frontend_test && docker-compose -f docker-compose-test.yml up -d"
+    - ssh -tt -o StrictHostKeyChecking=no -i ~/.ssh/server.pem $SSH_USER@$SSH_IP_SERVER -J jump-host "yes | docker image prune --filter 'dangling=true'"
+
+web:deploy-uat:
+  stage: deploy
+  extends: .before_script_template
+  only:
+    - uat
+  tags:
+    - vmogroup
+  variables:
+    AWS_PROFILE: vmo
+  script:
+    - ssh -tt -o StrictHostKeyChecking=no -i ~/.ssh/server.pem $SSH_USER@$SSH_IP_SERVER_UAT -J jump-host "aws ecr get-login-password --region ap-northeast-1 | docker login --username AWS --password-stdin 422520630625.dkr.ecr.ap-northeast-1.amazonaws.com && cd /home/developer/pni-fe && git pull && docker-compose -f docker-compose-uat.yml pull && docker rm -f pni_frontend && docker-compose -f docker-compose-uat.yml up -d"
+    - ssh -tt -o StrictHostKeyChecking=no -i ~/.ssh/server.pem $SSH_USER@$SSH_IP_SERVER_UAT -J jump-host "yes | docker image prune --filter 'dangling=true'"
