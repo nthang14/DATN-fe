@@ -1,9 +1,8 @@
-import FolderIcon from "@mui/icons-material/Folder";
+import { useEffect, useState } from "react";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import IconButton from "@mui/material/IconButton";
 import * as React from "react";
 import { useTranslations } from "next-intl";
-import Image from "next/image";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
 import {
@@ -13,25 +12,24 @@ import {
   DialogContent,
   DialogTitle,
 } from "@mui/material";
-import { useRouter } from "next/router";
-import Groups2Icon from "@mui/icons-material/Groups2";
-import ButtonCommon from "~/components/common/ButtonCommon";
-import { getColor } from "~/utils/helpers";
-import CloseIcon from "@mui/icons-material/Close";
+import { readGoogleToken } from "~/utils/storage";
+import defaultThumbnail from "~/assets/images/default-thumbnail.jpg";
 import StarBorderIcon from "@mui/icons-material/StarBorder";
 import StarIcon from "@mui/icons-material/Star";
+import Groups2Icon from "@mui/icons-material/Groups2";
+import ButtonCommon from "~/components/common/ButtonCommon";
+import CloseIcon from "@mui/icons-material/Close";
+import { getColor } from "~/utils/helpers";
 import EditIcon from "@mui/icons-material/Edit";
 import InputHasValidate from "~/components/common/InputCommon/InputHasValidate";
 import { useForm } from "react-hook-form";
-import CreateNewFolderIcon from "@mui/icons-material/CreateNewFolder";
 
-export default function FolderItem({
+export default function FileItem({
   handleOpenSelect,
   handleDelete,
   handleRemoveSharing,
   handleStar,
   handleRename,
-  handleCreateNewFolder,
   data,
   ...props
 }: any) {
@@ -47,8 +45,33 @@ export default function FolderItem({
       title: data.title,
     },
   });
+  const [thumbnail, setThumbnail] = useState("");
+  function getThumbnail() {
+    const fileId = data.ggId;
+    var xhr = new XMLHttpRequest();
+    xhr.open(
+      "GET",
+      `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`,
+      true
+    );
+    xhr.setRequestHeader("Authorization", "Bearer " + readGoogleToken());
+    xhr.responseType = "arraybuffer";
+    xhr.onload = function () {
+      const buf = xhr.response;
+      var base64String = btoa(
+        new Uint8Array(buf).reduce(
+          (data, byte) => data + String.fromCharCode(byte),
+          ""
+        )
+      );
+      setThumbnail(base64String);
+    };
+    xhr.send();
+  }
+  useEffect(() => {
+    getThumbnail();
+  }, []);
   const t = useTranslations();
-  const router = useRouter();
   const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(
     null
   );
@@ -64,17 +87,15 @@ export default function FolderItem({
   };
   const handleOpen = () => {
     setAnchorEl(null);
-    handleOpenSelect({ type: "folder", id: data.id });
+    handleOpenSelect({ type: "file", id: data.id });
   };
   const handleDeleteInter = () => {
     setAnchorEl(null);
-    handleDelete({ type: "folder", id: data.id });
+    handleDelete({ type: "file", id: data.id });
   };
   const [isDialog, setIsDialog] = React.useState<boolean>(false);
   const [isDialogEdit, setIsDialogEdit] = React.useState<boolean>(false);
   const [isDialogRemove, setIsDialogRemove] = React.useState<boolean>(false);
-  const [isDialogNew, setIsDialogNew] = React.useState<boolean>(false);
-
   const [userId, setUserId] = React.useState<string>("");
   const handleOpenRemove = (value: string) => {
     setIsDialogRemove(true);
@@ -87,32 +108,42 @@ export default function FolderItem({
     setAnchorEl(null);
   };
   const handleDoSubmitEdit = (value: any) => {
+    console.log("value", value);
     handleRename({
-      type: "folder",
+      type: "file",
       id: data.id,
       data: value,
     });
     setAnchorEl(null);
     setIsDialogEdit(false);
   };
-  const handleSubmitNewFolder = (value: any) => {
-    console.log("value", value);
-  };
   return (
-    <div>
-      <div className="items-center justify-between flex  bg-[#e8f5e8] rounded-[10px] cursor-pointer">
-        <div
-          onClick={() => router.push(`/folder/${data.id}`)}
-          className="flex items-center justify-start w-full px-4 py-3"
-        >
-          <FolderIcon />
-          <p className="pl-3 text-line-1 text-[14px] font-medium">
+    <div className="bg-[#e8f5e8] rounded-[10px]">
+      {/* header file item */}
+      <div className="items-center justify-between flex px-4 py-2 bg-[#e8f5e8] rounded-[10px] cursor-pointer">
+        <div className="flex items-center justify-star">
+          <img src={data.iconLink} alt="icon file" />
+          <div className="pl-3 text-line-1 text-[14px] font-medium">
             {data.title}
-          </p>
+          </div>
         </div>
+
         <IconButton color="primary" aria-describedby={id} onClick={handleClick}>
           <MoreVertIcon className="" />
         </IconButton>
+      </div>
+      {/* content */}
+      <div className="px-4 py-2">
+        <img
+          src={
+            !!thumbnail
+              ? `data:image/gif;base64,${thumbnail}`
+              : defaultThumbnail.src
+          }
+          alt="thumnial"
+          width="100%"
+          height="auto"
+        />
       </div>
       <Popover
         id={id}
@@ -136,27 +167,15 @@ export default function FolderItem({
             </span>
           </div>
           <div
-            onClick={() => {
-              reset();
-              setIsDialogNew(true);
-            }}
-            className="flex items-center justify-start py-2 cursor-pointer hover:bg-[#F2F9ED] px-4 rounded-2xl"
-          >
-            <CreateNewFolderIcon />
-            <span className="pl-3 text-[14px]">
-              {t("common.button.newFolder")}
-            </span>
-          </div>
-          <div
             onClick={() => handleOpen()}
-            className="w-[200px] flex items-center justify-start py-2 cursor-pointer hover:bg-[#F2F9ED] px-4 rounded-2xl"
+            className="w-[150px] flex items-center justify-start py-2 cursor-pointer hover:bg-[#F2F9ED] px-4 rounded-2xl"
           >
             <PersonAddIcon />
             <span className="pl-3 text-[14px]">{t("common.button.share")}</span>
           </div>
           <div
             onClick={() => handleDeleteInter()}
-            className="w-[200px] flex items-center justify-start py-2 cursor-pointer hover:bg-[#F2F9ED] px-4 rounded-2xl"
+            className="w-[150px] flex items-center justify-start py-2 cursor-pointer hover:bg-[#F2F9ED] px-4 rounded-2xl"
           >
             <DeleteOutlineOutlinedIcon />
             <span className="pl-3 text-[14px]">
@@ -173,14 +192,13 @@ export default function FolderItem({
             </span>
           </div>
           <div
-            onClick={() => {
-              setAnchorEl(null);
+            onClick={() =>
               handleUpdateStar({
                 id: data.id,
                 star: !data.isStar,
-                type: "folder",
-              });
-            }}
+                type: "file",
+              })
+            }
             className="w-[200pxx] flex items-center justify-start py-2 cursor-pointer hover:bg-[#F2F9ED] px-4 rounded-2xl"
           >
             {data.isStar ? (
@@ -259,7 +277,7 @@ export default function FolderItem({
         }}
       >
         <DialogContent>
-          <div className="py-3 pb-10"> {t("common.stopSharing")}</div>
+          <div className="py-3 pb-10">delete</div>
         </DialogContent>
         <DialogActions>
           <ButtonCommon
@@ -274,15 +292,15 @@ export default function FolderItem({
             onClick={() => {
               handleRemoveSharing({
                 id: data.id,
+                type: "file",
                 userId: userId,
-                type: "folder",
               });
               setIsDialogRemove(false);
             }}
             color="primary"
             className="w-[80px] rounded-3xl"
           >
-            {t("common.button.remove")}
+            {t("common.button.submit")}
           </ButtonCommon>
         </DialogActions>
       </Dialog>
@@ -304,10 +322,10 @@ export default function FolderItem({
               name="title"
               rules={{
                 required: t("common.messages.msg001input", {
-                  field: t("folderForm.nameFolder"),
+                  field: t("fileForm.nameFile"),
                 }),
               }}
-              label={`${t("folderForm.nameFolder")} *`}
+              label={`${t("fileForm.nameFile")} *`}
               error={errors.title}
               inputProps={{
                 style: {
@@ -337,58 +355,6 @@ export default function FolderItem({
             className="w-[80px] rounded-3xl"
           >
             {t("common.button.save")}
-          </ButtonCommon>
-        </DialogActions>
-      </Dialog>
-      <Dialog
-        open={isDialogNew}
-        onClose={() => {
-          setIsDialogNew(true);
-          reset();
-        }}
-      >
-        <DialogTitle>
-          <div className="text-center">{t("common.button.newFolder")}</div>
-        </DialogTitle>
-        <DialogContent>
-          <div className="py-3 pb-10">
-            <InputHasValidate
-              control={control}
-              name="title"
-              rules={{
-                required: t("common.messages.msg001input", {
-                  field: t("folderForm.nameFolder"),
-                }),
-              }}
-              label={`${t("folderForm.nameFolder")} *`}
-              error={errors.title}
-              inputProps={{
-                style: {
-                  color: errors.title && "#B33434",
-                },
-              }}
-              type="text"
-            />
-          </div>
-        </DialogContent>
-        <DialogActions>
-          <ButtonCommon
-            color="primary"
-            variant="outlined"
-            className="w-[80px] rounded-3xl"
-            onClick={() => {
-              setIsDialogNew(false);
-              reset();
-            }}
-          >
-            {t("common.button.cancel")}
-          </ButtonCommon>
-          <ButtonCommon
-            onClick={handleSubmit(handleSubmitNewFolder)}
-            color="primary"
-            className="w-[80px] rounded-3xl"
-          >
-            {t("common.button.submit")}
           </ButtonCommon>
         </DialogActions>
       </Dialog>

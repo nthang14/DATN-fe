@@ -1,73 +1,76 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import baseQuery from "~/app/config/baseQuery";
-export const folderServiceApi = createApi({
-  reducerPath: "folderServiceApi",
+export const fileServiceApi = createApi({
+  reducerPath: "fileServiceApi",
   baseQuery: baseQuery,
   refetchOnMountOrArgChange: true,
   endpoints: (builder) => ({
-    getFoldersByOwner: builder.query({
+    getFileByOwner: builder.query({
       query: (params) => ({
-        url: `/folders`,
+        url: `/files`,
         method: "GET",
         params: params,
       }),
     }),
-    createFolder: builder.mutation({
+    uploadFile: builder.mutation({
       query: (payload) => {
         return {
-          url: "/folders",
+          url: "/files/upload",
           method: "POST",
           body: payload,
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
         };
       },
     }),
-    getFolderShareWithMe: builder.query({
+    getFileShareWithMe: builder.query({
       query: (params) => ({
-        url: `/folders/shared-me`,
+        url: `/files/shared-me`,
         method: "GET",
         params: params,
       }),
     }),
-    sharingPermissions: builder.mutation({
+    sharingPermissionsFile: builder.mutation({
       query: (payload) => {
-        console.log(payload);
         return {
-          url: `/folders/${payload.id}/sharing`,
+          url: `/files/${payload.id}/sharing`,
           method: "PUT",
           body: payload.payload,
         };
       },
     }),
-    updateStarFolder: builder.mutation({
+    updateStar: builder.mutation({
       query: (payload) => {
         return {
-          url: `/folders/${payload.id}/star`,
+          url: `/files/${payload.id}/star`,
           method: "PUT",
-          body: { isStar: payload.star },
+          body: {isStar: payload.star},
         };
       },
     }),
-    deleteFolder: builder.mutation({
+    deleteFile: builder.mutation({
       query: (id: string) => {
         return {
-          url: `/folders/${id}`,
+          url: `/files/${id}`,
           method: "DELETE",
         };
       },
     }),
-    removePermissionsFolder: builder.mutation({
+    removePermissionsFile: builder.mutation({
       query: (payload) => {
+        console.log(payload)
         return {
-          url: `/folders/${payload.id}/remove`,
+          url: `/files/${payload.id}/remove`,
           method: "PUT",
           body: payload.payload,
         };
       },
     }),
-    updateFolder: builder.mutation({
+    updateFile: builder.mutation({
       query: (payload) => {
         return {
-          url: `/folders/${payload.id}`,
+          url: `/files/${payload.id}`,
           method: "PUT",
           body: payload.data,
         };
@@ -77,12 +80,12 @@ export const folderServiceApi = createApi({
 });
 
 export const {
-  useGetFoldersByOwnerQuery,
-  useCreateFolderMutation,
-  useGetFolderShareWithMeQuery,
-  useSharingPermissionsMutation,
-  useDeleteFolderMutation,
-  useUpdateStarFolderMutation,
-  useRemovePermissionsFolderMutation,
-  useUpdateFolderMutation
-} = folderServiceApi;
+  useDeleteFileMutation,
+  useGetFileByOwnerQuery,
+  useUploadFileMutation,
+  useGetFileShareWithMeQuery,
+  useSharingPermissionsFileMutation,
+  useUpdateStarMutation,
+  useRemovePermissionsFileMutation,
+  useUpdateFileMutation
+} = fileServiceApi;

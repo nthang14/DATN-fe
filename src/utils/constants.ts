@@ -2,7 +2,7 @@ import getConfig from "next/config";
 export const ORDER_ASCEND = "ascend";
 export const ORDER_DESCEND = "descend";
 const { publicRuntimeConfig } = getConfig();
-export const PATH_API: string = publicRuntimeConfig.baseURL;
+export const PATH_API: string = 'http://localhost:8080';
 export const PATH_API_TEST: string = "http://localhost:8000/api/v1";
 export const URL_AUTH = "/auth";
 export const METHOD = {
@@ -14,7 +14,7 @@ export const METHOD = {
 export const REGEX_ADDRESS =
   /^((?=.*0x)(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])).{42}$/im;
 export const REGEX_EMAIL =
-  /^[a-zA-Z0-9]{8,}$|^(?=.{8,256}$)[a-zA-Z0-9]+([._-]{0,1}[a-zA-Z0-9]+)?@[a-zA-Z0-9]+([._-]{0,1}[a-zA-Z0-9]+)[.]{1}[a-zA-Z]{2,}$/gm;
+  /^[a-zA-Z0-9]{8,}$/gm;
 export const REGEX_EMAIL_CONTACT =
   /^(?=.{8,256}$)[a-zA-Z0-9]+([._-]{0,1}[a-zA-Z0-9]+)?@[a-zA-Z0-9]+([._-]{0,1}[a-zA-Z0-9]+)[.]{1}[a-zA-Z]{2,}$/gm;
 export const TYPE = {

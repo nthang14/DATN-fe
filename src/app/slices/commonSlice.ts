@@ -7,6 +7,8 @@ export interface CommonState {
   progressNumber?: number;
   loading?: boolean;
   showLoading?: boolean;
+  isReload?: boolean;
+
 }
 
 const initialState: CommonState = {
@@ -15,7 +17,8 @@ const initialState: CommonState = {
     typeAlert: "success",
     progressNumber: 0,
     loading: false,
-    showLoading: true
+    showLoading: true,
+    isReload: false
 };
 
 export const commonSlice = createSlice({
@@ -36,10 +39,13 @@ export const commonSlice = createSlice({
     },
     setShowLoading (state, action) {
       state.showLoading = action.payload
+    },
+    setIsReload (state, action) {
+      state.isReload = action.payload
     }
   },
 });
 
-export const { setNotify, setProgress, setLoading, setShowLoading } = commonSlice.actions;
+export const { setNotify, setProgress, setLoading, setShowLoading, setIsReload } = commonSlice.actions;
 
 export default commonSlice.reducer;

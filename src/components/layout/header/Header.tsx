@@ -16,7 +16,6 @@ import {
 import ButtonCommon from "~/components/common/ButtonCommon";
 import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
 import ArrowRightOutlinedIcon from "@mui/icons-material/ArrowRightOutlined";
-import { logout } from "~/app/slices/authSlice";
 import { useDispatch } from "react-redux";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -29,7 +28,9 @@ import infoIcon from "~/assets/icons/info-icon.svg";
 import { useAuthLogoutMutation } from "~/app/services/authService";
 import Link from "next/link";
 import { NoSsr } from "@mui/base";
-import logo from "~/assets/images/logo_horizontal_green.png";
+import logo from "~/assets/images/logo.png";
+import Image from "next/image";
+import { saveAccessToken } from "~/utils/storage";
 
 export default function Header() {
   const t = useTranslations();
@@ -45,9 +46,8 @@ export default function Header() {
   };
   const dispatch = useDispatch();
   const handleLogout = async () => {
-    const result: any = await authLogout({});
-    dispatch(logout({}));
-    window.location.href = "/auth/login";
+    saveAccessToken("");
+    router.push("/auth/login");
   };
   const items = [
     {
@@ -73,11 +73,16 @@ export default function Header() {
   const profile = readProfile();
   return (
     <div>
-      <div className="flex items-center justify-between px-[16px] h-[64px]">
+      <div className="flex items-center justify-between px-[16px] h-[80px]">
         <Link
-          href="/dashboard"
+          href="/"
           className="font-semibold text-[32px] leading-[42px] text-primary-06 text-center px-[12.15px] project-number cursor-pointer no-underline flex items-center"
-        ></Link>
+        >
+          <Image src={logo.src} width={50} height={50} alt="logo" />
+          <span className="text-[20px] font-normal text-[#444746]">
+            Storage
+          </span>
+        </Link>
         <div className="flex items-center justify-around">
           <NoSsr>
             <div className="w-10 h-10 rounded-full uppercase flex justify-center items-center bg-neutral-03 text-[24px] leading-[32px] font-medium text-neutral-07">
@@ -177,7 +182,7 @@ export default function Header() {
               onClick={handleOk}
               autoFocus
             >
-              {/* {t("common.button.continue")} */}
+              {t("common.button.logout")}
             </ButtonCommon>
           </DialogActions>
         </Dialog>

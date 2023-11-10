@@ -15,16 +15,18 @@ import InputHasValidate from "~/components/common/InputCommon/InputHasValidate";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import VisibilityOffOutlinedIcon from "@mui/icons-material/VisibilityOffOutlined";
 import { validatePassword } from "~/utils/helpers";
-import imageLogin from "~/assets/images/image-login.webp";
-
-export default function Login() {
+import { useRegisterMutation } from "~/app/services/userService";
+export default function Register() {
   const ref = useRef<HTMLInputElement>(null);
+  const refRemind = useRef<HTMLInputElement>(null);
+
   const dispatch = useDispatch();
   const {
     handleSubmit,
     control,
     formState: { errors },
     setError,
+    getValues,
   } = useForm({ mode: "onBlur" });
 
   const t = useTranslations();
@@ -34,34 +36,23 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
-  const [login] = useAuthLoginMutation();
+  const [register] = useRegisterMutation();
   const [isOutSide, setIsOutSide] = useState(false);
-  const handleLogin = async (value: any) => {
+  const handleRegister = async (value: any) => {
+    const { fullName, username, password } = value;
     if (isLoading) return;
     setIsLoading(true);
-    const result: any = await login(value);
-
-    if (!!result && result?.data?.success) {
-      saveAccessToken(result?.data?.data?.access_token || "");
+    const result = await register({ fullName, username, password });
+    if (result) {
       dispatch(
         setNotify({
           isShowNotify: true,
-          notifyContent: t("common.messages.msg005"),
+          notifyContent: t("common.messages.msg011"),
           typeAlert: "success",
         })
       );
-      router.push("/");
+      router.push("/auth/login");
       return;
-    } else {
-      const data: any = result.data?.data;
-      setError("password", {
-        type: "manual",
-        message: t("common.messages.msg002"),
-      });
-      setError("username", {
-        type: "manual",
-        message: t("common.messages.msg002email"),
-      });
     }
     setIsLoading(false);
   };
@@ -90,44 +81,57 @@ export default function Login() {
   const clickEye = (showPassword: boolean) => {
     setShowPassword(showPassword);
   };
+  const confirmPassword = (value: string, message: string) => {
+    const password = getValues("password");
+    if (value !== password) {
+      return t("common.messages.msg010");
+    }
+    validatePassword(value, message);
+  };
   return (
-    <article id="login-page">
+    <article id="register-page">
       <div className="login-page container mx-auto flex items-center min-h-screen justify-center">
         <div className="login-wrap">
-          <div className="form-login flex justify-around items-center px-16 py-28 gap-x-16">
+          <div className="form-login px-16 py-10 gap-x-16">
             <div>
-              <Image
-                src={imageLogin.src}
-                width={316}
-                height={289}
-                alt="image-login"
-                className="image-transform"
-              />
-            </div>
-            <div>
-              <div className="title">
+              <div className="title flex items-center justify-center pb-8">
                 <Typography
                   variant="h3"
                   className="pni-text-title text-center font-bold"
                 >
-                  {t("login.title")}
+                  {t("register.title")}
                 </Typography>
-                <span className="pni-text-base">{t("login.sub_title")}</span>
               </div>
               <div className="text-field">
+                <InputHasValidate
+                  control={control}
+                  name="fullName"
+                  rules={{
+                    required: t("common.messages.msg001input", {
+                      field: t("register.payload.fullName"),
+                    }),
+                  }}
+                  label={t("register.payload.fullName")}
+                  error={errors.fullName}
+                  inputProps={{
+                    style: { color: errors.fullName && "#B33434" },
+                  }}
+                  maxLength={256}
+                  type="text"
+                />
                 <InputHasValidate
                   control={control}
                   name="username"
                   rules={{
                     required: t("common.messages.msg001input", {
-                      field: t("login.payload.username"),
+                      field: t("register.payload.username"),
                     }),
                     pattern: {
                       value: REGEX_EMAIL,
                       message: t("common.messages.msg002"),
                     },
                   }}
-                  label={t("login.payload.username")}
+                  label={t("register.payload.username")}
                   error={errors.username}
                   inputProps={{
                     style: { color: errors.username && "#B33434" },
@@ -148,15 +152,70 @@ export default function Login() {
                     className={`${showPassword ? "" : "password-security"}`}
                     rules={{
                       required: t("common.messages.msg001input", {
-                        field: t("login.payload.password"),
+                        field: t("register.payload.password"),
                       }),
                       validate: (value: string) =>
                         validatePassword(value, t("common.messages.msg002")),
                     }}
-                    label={t("login.payload.password")}
+                    label={t("register.payload.password")}
                     error={isOutSide ? errors.password : null}
                     inputProps={{
                       style: { color: errors.password && "#B33434" },
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton
+                            className="bg-white hover:bg-white"
+                            onClick={() => clickEye(!showPassword)}
+                            edge="end"
+                            style={{ color: errors.password && "#B33434" }}
+                          >
+                            {showPassword ? (
+                              <VisibilityOffOutlinedIcon
+                                className={
+                                  errors.password && isOutSide
+                                    ? "fill-error"
+                                    : "fill-neutral-09"
+                                }
+                              />
+                            ) : (
+                              <VisibilityOutlinedIcon
+                                className={
+                                  errors.password && isOutSide
+                                    ? "fill-error"
+                                    : "fill-neutral-09"
+                                }
+                              />
+                            )}
+                          </IconButton>
+                        </InputAdornment>
+                      ),
+                    }}
+                    maxLength={256}
+                    attribute={{
+                      autoComplete: "new-password",
+                      form: {
+                        autoComplete: "off",
+                      },
+                    }}
+                    type="text"
+                  />
+                </div>
+                <div ref={refRemind} className="w-full">
+                  <InputHasValidate
+                    control={control}
+                    name="confirmPassword"
+                    className={`${showPassword ? "" : "password-security"}`}
+                    rules={{
+                      required: t("common.messages.msg001input", {
+                        field: t("register.payload.confirmPassword"),
+                      }),
+                      validate: (value: string) =>
+                        confirmPassword(value, t("common.messages.msg002")),
+                    }}
+                    label={t("register.payload.confirmPassword")}
+                    error={isOutSide ? errors.confirmPassword : null}
+                    inputProps={{
+                      style: { color: errors.confirmPassword && "#B33434" },
                       endAdornment: (
                         <InputAdornment position="end">
                           <IconButton
@@ -202,16 +261,16 @@ export default function Login() {
                     size="large"
                     variant="contained"
                     className="rounded-3xl w-full"
-                    onClick={handleSubmit(handleLogin)}
+                    onClick={handleSubmit(handleRegister)}
                   >
-                    {t("login.button")}
+                    {t("register.button")}
                   </ButtonCommon>
                 </div>
                 <div
                   className="text-[14px] hover:underline cursor-pointer"
-                  onClick={() => router.push("/auth/register")}
+                  onClick={() => router.push("/auth/login")}
                 >
-                  {t("login.register")}
+                  {t("register.login")}
                 </div>
               </div>
             </div>

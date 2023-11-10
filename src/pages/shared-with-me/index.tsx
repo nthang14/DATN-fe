@@ -5,7 +5,6 @@ import {
   useDeleteFolderMutation,
   useUpdateStarFolderMutation,
   useRemovePermissionsFolderMutation,
-  useUpdateFolderMutation,
 } from "~/app/services/folderService";
 import {
   useGetFileByOwnerQuery,
@@ -14,7 +13,6 @@ import {
   useSharingPermissionsFileMutation,
   useUpdateStarMutation,
   useRemovePermissionsFileMutation,
-  useUpdateFileMutation,
 } from "~/app/services/fileService";
 import LayoutGrid from "~/components/layout/LayoutGrid";
 import FolderItem from "~/components/FolderItem";
@@ -33,7 +31,6 @@ import SelectUser from "~/components/common/SelectUser";
 import { setNotify, setIsReload } from "~/app/slices/commonSlice";
 import { useDispatch, useSelector } from "react-redux";
 import DialogCommon from "~/components/common/DialogCommon";
-
 export default function Home() {
   const isReload = useSelector((state: any) => state?.common.isReload);
   const dispatch = useDispatch();
@@ -140,9 +137,7 @@ export default function Home() {
       ),
     },
   ];
-  const fetchFolders = useGetFoldersByOwnerQuery(paginator);
   const fetFoldersShareMe = useGetFolderShareWithMeQuery(paginator);
-  const fetchFiles = useGetFileByOwnerQuery({});
   const fetchFilesShareMe = useGetFileShareWithMeQuery({});
   const [deleteFolder] = useDeleteFolderMutation();
   const [sharingPermissions] = useSharingPermissionsMutation();
@@ -152,36 +147,22 @@ export default function Home() {
   const [sharingPermissionsFile] = useSharingPermissionsFileMutation();
   const [deleteFile] = useDeleteFileMutation();
   const [updateStar] = useUpdateStarMutation();
-  const [updateFolder] = useUpdateFolderMutation();
-  const [updateFile] = useUpdateFileMutation();
-
   useEffect(() => {
     if (isReload) {
-      if (isOwner) {
-        fetchFolders.refetch();
-        fetchFiles.refetch();
-      } else {
-        fetFoldersShareMe.refetch();
-        fetchFilesShareMe.refetch();
-      }
+      fetFoldersShareMe.refetch();
+      fetchFilesShareMe.refetch();
       dispatch(setIsReload(false));
     }
   }, [isReload]);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   if (
-    (fetchFiles &&
-      !fetchFiles.isFetching &&
-      fetchFiles.isSuccess &&
-      fetchFiles?.data?.googleToken) ||
-    (fetchFilesShareMe &&
-      !fetchFilesShareMe.isFetching &&
-      fetchFilesShareMe.isSuccess &&
-      fetchFilesShareMe?.data?.googleToken)
+    fetchFilesShareMe &&
+    !fetchFilesShareMe.isFetching &&
+    fetchFilesShareMe.isSuccess &&
+    fetchFilesShareMe?.data?.googleToken
   ) {
-    saveGoogleToken(
-      fetchFiles?.data?.googleToken || fetchFilesShareMe?.data?.googleToken
-    );
+    saveGoogleToken(fetchFilesShareMe?.data?.googleToken);
   }
   const handleChangePage = (e: any) => {
     setPaginator({
@@ -216,7 +197,6 @@ export default function Home() {
             typeAlert: "success",
           })
         );
-        fetchFolders.refetch();
         fetFoldersShareMe.refetch();
       }
       return;
@@ -236,7 +216,6 @@ export default function Home() {
             typeAlert: "success",
           })
         );
-        fetchFiles.refetch();
         fetchFilesShareMe.refetch();
       }
     }
@@ -256,7 +235,6 @@ export default function Home() {
           })
         );
       }
-      fetchFolders.refetch();
       fetFoldersShareMe.refetch();
       setIsModalOpen(false);
 
@@ -273,7 +251,6 @@ export default function Home() {
           })
         );
       }
-      fetchFiles.refetch();
       fetchFilesShareMe.refetch();
       setIsModalOpen(false);
 
@@ -291,7 +268,6 @@ export default function Home() {
             typeAlert: "success",
           })
         );
-        fetchFolders.refetch();
         fetFoldersShareMe.refetch();
       }
       return;
@@ -306,7 +282,6 @@ export default function Home() {
             typeAlert: "success",
           })
         );
-        fetchFiles.refetch();
         fetchFilesShareMe.refetch();
       }
     }
@@ -327,7 +302,6 @@ export default function Home() {
             typeAlert: "success",
           })
         );
-        fetchFolders.refetch();
         fetFoldersShareMe.refetch();
       }
       return;
@@ -347,44 +321,6 @@ export default function Home() {
             typeAlert: "success",
           })
         );
-        fetchFiles.refetch();
-        fetchFilesShareMe.refetch();
-      }
-    }
-  };
-  const handleRename = async (data: any) => {
-    if (data?.type === "folder") {
-      const result = await updateFolder({
-        id: data.id,
-        data: data.data,
-      });
-      if (!!result) {
-        dispatch(
-          setNotify({
-            isShowNotify: true,
-            notifyContent: t("common.messages.msg012"),
-            typeAlert: "success",
-          })
-        );
-        fetchFolders.refetch();
-        fetFoldersShareMe.refetch();
-      }
-      return;
-    }
-    if (data?.type === "file") {
-      const result = await updateFile({
-        id: data.id,
-        data: data.data,
-      });
-      if (!!result) {
-        dispatch(
-          setNotify({
-            isShowNotify: true,
-            notifyContent: t("common.messages.msg012"),
-            typeAlert: "success",
-          })
-        );
-        fetchFiles.refetch();
         fetchFilesShareMe.refetch();
       }
     }
@@ -397,23 +333,18 @@ export default function Home() {
           // layout table
 
           <div className="table-layout">
-            {fetchFolders.isSuccess &&
-              fetchFiles.isSuccess &&
-              fetFoldersShareMe.isSuccess &&
-              fetchFilesShareMe.isSuccess && (
-                <TableCommon
-                  handleChangePage={handleChangePage}
-                  columns={columns}
-                  fetchData={[
-                    ...fetchFolders?.data?.data,
-                    ...fetFoldersShareMe?.data?.data,
-                    ...fetchFiles?.data?.data,
-                    ...fetchFilesShareMe?.data?.data,
-                  ]}
-                  paginator={paginator}
-                  data={fetchFolders?.data}
-                />
-              )}
+            {fetFoldersShareMe.isSuccess && fetchFilesShareMe.isSuccess && (
+              <TableCommon
+                handleChangePage={handleChangePage}
+                columns={columns}
+                fetchData={[
+                  ...fetFoldersShareMe?.data?.data,
+                  ...fetchFilesShareMe?.data?.data,
+                ]}
+                paginator={paginator}
+                data={fetFoldersShareMe?.data}
+              />
+            )}
           </div>
         ) : (
           // layout grid
@@ -424,20 +355,6 @@ export default function Home() {
                 {t("common.folders")}
               </div>
               <div className="grid grid-cols-3 gap-4">
-                {fetchFolders?.data?.data?.map((item: any) => {
-                  return (
-                    <div key={item.id}>
-                      <FolderItem
-                        data={item}
-                        handleDelete={handleDelete}
-                        handleOpenSelect={handleOpenSelect}
-                        handleStar={handleUpdateStar}
-                        handleRemoveSharing={handleRemoveSharing}
-                        handleRename={handleRename}
-                      />
-                    </div>
-                  );
-                })}
                 {fetFoldersShareMe?.data?.data?.map((item: any) => {
                   return (
                     <div key={item.id}>
@@ -447,7 +364,6 @@ export default function Home() {
                         handleOpenSelect={handleOpenSelect}
                         handleStar={handleUpdateStar}
                         handleRemoveSharing={handleRemoveSharing}
-                        handleRename={handleRename}
                       />
                     </div>
                   );
@@ -459,20 +375,6 @@ export default function Home() {
                 {t("common.files")}
               </div>
               <div className="grid grid-cols-3 gap-4">
-                {fetchFiles?.data?.data?.map((item: any) => {
-                  return (
-                    <div key={item.id}>
-                      <FileItem
-                        data={item}
-                        handleDelete={handleDelete}
-                        handleOpenSelect={handleOpenSelect}
-                        handleStar={handleUpdateStar}
-                        handleRemoveSharing={handleRemoveSharing}
-                        handleRename={handleRename}
-                      />
-                    </div>
-                  );
-                })}
                 {fetchFilesShareMe?.data?.data?.map((item: any) => {
                   return (
                     <div key={item.id}>
@@ -482,7 +384,6 @@ export default function Home() {
                         handleOpenSelect={handleOpenSelect}
                         handleStar={handleUpdateStar}
                         handleRemoveSharing={handleRemoveSharing}
-                        handleRename={handleRename}
                       />
                     </div>
                   );

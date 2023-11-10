@@ -92,15 +92,14 @@ const TableCommon = ({ children, ...props }: any) => {
               </TableBody>
             </Table>
           </TableContainer>
-          <PaginationCommon
+          {/* <PaginationCommon
             paginator={paginator}
             handleChangePage={handleChangePage}
             data={pagination}
             total={data.total}
-            count={data.count}
             totalPage={Math.ceil(data.total / paginator.limit)}
             page={paginator.page}
-          />
+          /> */}
         </div>
       ) : (
         <div className="box-form">
@@ -112,15 +111,6 @@ const TableCommon = ({ children, ...props }: any) => {
                 {t("common.messages.msg004")}
               </div>
             </div>
-            {isTableDashboard ? (<div className="mt-3"></div>) : (<Link href={props.linkNoData || "/transfer"} className="mt-9">
-              <ButtonCommon
-                className="btn h-[40px] w-[155px] font-medium rounded-3xl"
-                variant="contained"
-                color="primary"
-                size="small"
-                title={button(props.buttonNoData || "create_transfer")}
-              />
-            </Link>)}
           </div>
         </div>
       )}

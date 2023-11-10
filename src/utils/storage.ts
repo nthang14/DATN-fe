@@ -37,3 +37,13 @@ export const saveProfile = (profile: object) => {
 export const readProfile = () => {
   return stringToJson(cookie.get(PROFILE) || "");
 };
+
+const GOOGLE_TOKEN = "googleToken";
+
+export const saveGoogleToken = (googleToken: string) => {
+  cookie.set(GOOGLE_TOKEN, googleToken, { expires: 1 });
+};
+
+export const readGoogleToken = () => {
+  return cookie.get(GOOGLE_TOKEN);
+};

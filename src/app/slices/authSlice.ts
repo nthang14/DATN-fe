@@ -1,15 +1,8 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { authServiceApi } from "~/app/services/authService";
 import {
-  saveOTP,
-  savePassword,
-  saveMnemonic,
-  saveAddressWallet,
-  saveUsername,
   saveAccessToken,
   saveRefreshToken,
-  saveFcmToken,
-  saveNonce,
 } from "~/utils/storage";
 export interface AuthState {
   mnemonic_encrypted?: string;
@@ -25,24 +18,6 @@ export const authSlice = createSlice({
   name: "auth",
   initialState,
   reducers: {
-    setAuthState(state, action) {
-      if (!!action.payload.mnemonic_encrypted) {
-        state.mnemonic_encrypted = action.payload.mnemonic_encrypted;
-      }
-    },
-    logout(state, action) {
-      saveOTP("");
-      saveMnemonic("");
-      savePassword("");
-      saveAddressWallet("");
-      saveUsername("");
-      saveAccessToken("");
-      saveRefreshToken("");
-      saveFcmToken("");
-    },
-    setNonce(state, action) {
-      saveNonce(action.payload);
-    },
   },
 
   extraReducers: (builder) => {
@@ -63,6 +38,6 @@ export const authSlice = createSlice({
   },
 });
 
-export const { setAuthState, logout, setNonce } = authSlice.actions;
+export const { } = authSlice.actions;
 
 export default authSlice.reducer;

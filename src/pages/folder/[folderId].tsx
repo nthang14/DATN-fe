@@ -33,16 +33,17 @@ import SelectUser from "~/components/common/SelectUser";
 import { setNotify, setIsReload } from "~/app/slices/commonSlice";
 import { useDispatch, useSelector } from "react-redux";
 import DialogCommon from "~/components/common/DialogCommon";
-
 export default function Home() {
   const isReload = useSelector((state: any) => state?.common.isReload);
   const dispatch = useDispatch();
   const router = useRouter();
+  const parentId = router?.query?.folderId || "";
   const isOwner = router?.query?.type !== "shared-with-me";
   const t = useTranslations();
   const [paginator, setPaginator] = useState({
     limit: 10000,
     page: 1,
+    parentId: parentId,
   });
   const [isPreview, setIsPreview] = useState(false);
   const [openSelect, setOpenSelect] = useState(false);
@@ -142,8 +143,8 @@ export default function Home() {
   ];
   const fetchFolders = useGetFoldersByOwnerQuery(paginator);
   const fetFoldersShareMe = useGetFolderShareWithMeQuery(paginator);
-  const fetchFiles = useGetFileByOwnerQuery({});
-  const fetchFilesShareMe = useGetFileShareWithMeQuery({});
+  const fetchFiles = useGetFileByOwnerQuery({ parentId: parentId });
+  const fetchFilesShareMe = useGetFileShareWithMeQuery({ parentId: parentId });
   const [deleteFolder] = useDeleteFolderMutation();
   const [sharingPermissions] = useSharingPermissionsMutation();
   const [updateStarFolder] = useUpdateStarFolderMutation();
@@ -154,7 +155,6 @@ export default function Home() {
   const [updateStar] = useUpdateStarMutation();
   const [updateFolder] = useUpdateFolderMutation();
   const [updateFile] = useUpdateFileMutation();
-
   useEffect(() => {
     if (isReload) {
       if (isOwner) {
@@ -187,6 +187,7 @@ export default function Home() {
     setPaginator({
       page: e,
       limit: 10000,
+      parentId: parentId,
     });
   };
   const handleOpenSelect = (data: any) => {

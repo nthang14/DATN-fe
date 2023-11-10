@@ -1,4 +1,3 @@
-import { logout } from "~/app/slices/authSlice";
 import {
   BaseQueryFn,
   FetchArgs,
@@ -7,7 +6,7 @@ import {
 import { Mutex } from "async-mutex";
 import axios from "axios";
 import {
-  readAccessToken,
+  readAccessToken, saveAccessToken
 } from "~/utils/storage";
 import { METHOD } from "~/utils/constants";
 import { PATH_API } from "~/utils/constants";
@@ -47,6 +46,7 @@ instance.interceptors.response.use(
     return response;
   },
   async (error: any) => {
+    console.log(error)
     if (
       error?.response &&
       error?.response?.status === 498
@@ -56,9 +56,9 @@ instance.interceptors.response.use(
       error?.response &&
       error?.response?.status === 401
     ) {
-      store.dispatch(logout({}));
       if (window.location.pathname !== "/auth/login") {
         window.location.href = "/auth/login";
+        saveAccessToken('')
       }
     }
     return error.response;
@@ -110,7 +110,6 @@ const baseQuery: BaseQueryFn<
         if (window.location.pathname !== "/auth/login") {
           window.location.href = "/auth/login";
         }
-        store.dispatch(logout({}));
         break;
       case 403:
         break;

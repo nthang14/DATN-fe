@@ -5,13 +5,28 @@ export const userServiceApi = createApi({
   baseQuery: baseQuery,
   refetchOnMountOrArgChange: true,
   endpoints: (builder) => ({
-    getUserByAddress: builder.query({
-      query: (address: string) => ({
-        url: `/users/${address}`,
+    getUsers: builder.query({
+      query: (params: any) => ({
+        url: `/users`,
         method: "GET",
+        params: params,
       }),
     }),
+    getUsersNoParams: builder.query({
+      query: () => ({
+        url: `/users`,
+        method: "GET",
+        params: {limit: 100000},
+      }),
+    }),
+    register: builder.mutation({
+      query: (payload) => ({
+        url: `/users`,
+        method: "POST",
+        body: payload,
+      }),
+    })
   }),
 });
 
-export const { useGetUserByAddressQuery } = userServiceApi;
+export const { useGetUsersQuery, useGetUsersNoParamsQuery, useRegisterMutation } = userServiceApi;

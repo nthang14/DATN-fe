@@ -1,21 +1,29 @@
 import TextField from "@mui/material/TextField";
-import {NoSsr} from "@mui/material";
+import { NoSsr } from "@mui/material";
 
 const InputCommon = ({ ...props }) => {
   return (
     <>
       <NoSsr>
         <TextField
+          aria-describedby={props.ariaDescribedby || null}
           className={`w-full ${props.className}`}
-          label={props.placeholder || props.label}
-          onChange={props.onChange}
+          label={props.label}
+          placeholder={props.placeholder}
+          onChange={(event) => props.onChange(event?.target?.value)}
           onBlur={(e) => {
-            let value = e.target.value;
-            if (props.onChange) {
-              props.onChange(value.trim());
-            }
             if (props.onBlur) {
               props.onBlur();
+            }
+          }}
+          onFocus={(e) => {
+            if (props.onFocus) {
+              props.onFocus(e);
+            }
+          }}
+          onClick={(e) => {
+            if (props.onClick) {
+              props.onClick(e);
             }
           }}
           value={props.value}
