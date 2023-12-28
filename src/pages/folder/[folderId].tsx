@@ -283,7 +283,7 @@ export default function Home() {
   };
   const handleUpdateStar = async (data: any) => {
     if (data?.type === "folder") {
-      const result = await updateStarFolder({ id: data.id, star: data.star });
+      const result = await updateStarFolder({ id: data.id });
       if (!!result) {
         dispatch(
           setNotify({
@@ -298,7 +298,7 @@ export default function Home() {
       return;
     }
     if (data?.type === "file") {
-      const result = await updateStar({ id: data.id, star: data.star });
+      const result = await updateStar({ id: data.id });
       if (!!result) {
         dispatch(
           setNotify({

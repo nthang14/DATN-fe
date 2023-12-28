@@ -30,8 +30,9 @@ import Link from "next/link";
 import { NoSsr } from "@mui/base";
 import logo from "~/assets/images/logo.png";
 import Image from "next/image";
-import { saveAccessToken } from "~/utils/storage";
-
+import { saveAccessToken, saveProfile } from "~/utils/storage";
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import VpnKeyIcon from "@mui/icons-material/VpnKey";
 export default function Header() {
   const t = useTranslations();
   const [authLogout] = useAuthLogoutMutation();
@@ -44,23 +45,39 @@ export default function Header() {
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(!anchorEl ? event.currentTarget : null);
   };
-  const dispatch = useDispatch();
   const handleLogout = async () => {
     saveAccessToken("");
+    saveProfile({});
     router.push("/auth/login");
   };
   const items = [
     {
+      label: <div className="capitalize">My profile</div>,
+      key: "My profile",
+      icon: <AccountCircleIcon />,
+    },
+    {
+      label: <div className="capitalize">Change password</div>,
+      key: "Change password",
+      icon: <VpnKeyIcon />,
+    },
+    {
       label: <div className="capitalize">{LOGOUT}</div>,
       key: "log out",
       icon: <LogoutOutlinedIcon />,
-      trailingIcon: <ArrowRightOutlinedIcon />,
     },
   ];
   const handleClickMenuItem = ({ key }: any) => {
     if (key === LOGOUT) {
       setIsModalOpen(true);
     }
+    if (key === "My profile") {
+      router.push("/my-profile");
+    }
+    if (key === "Change password") {
+      router.push("/change-password");
+    }
+
     setAnchorEl(null);
   };
   const handleOk = () => {
@@ -90,7 +107,7 @@ export default function Header() {
             </div>
             <div>
               <div className="font-semibold text-[14px] px-2 pr-3">
-                {profile?.name || profile?.username}
+                {profile?.fullName || profile?.name}
               </div>
               <div className="text-primary text-[12px] px-2 pr-3">
                 {profile?.role === ROLE_ADMIN.value
@@ -125,12 +142,11 @@ export default function Header() {
                     onClick={() => handleClickMenuItem(item)}
                     className="!px-0 !py-2"
                   >
-                    <ListItemButton className="flex gap-3 !py-0 !px-3 logout-btn">
+                    <ListItemButton className="hover:bg-[#F2F9ED] flex gap-3 !py-0 !px-3 logout-btn">
                       {item.icon}
-                      <ListItemText className="!my-2 w-[144px]">
+                      <ListItemText className="!my-2 min-w-[144px] ">
                         <div className="capitalize">{item.label}</div>
                       </ListItemText>
-                      {item.trailingIcon}
                     </ListItemButton>
                   </ListItem>
                 );

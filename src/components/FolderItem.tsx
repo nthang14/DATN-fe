@@ -24,7 +24,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import InputHasValidate from "~/components/common/InputCommon/InputHasValidate";
 import { useForm } from "react-hook-form";
 import CreateNewFolderIcon from "@mui/icons-material/CreateNewFolder";
-
+import { readProfile } from "~/utils/storage";
 export default function FolderItem({
   handleOpenSelect,
   handleDelete,
@@ -49,6 +49,7 @@ export default function FolderItem({
   });
   const t = useTranslations();
   const router = useRouter();
+  const profile = readProfile();
   const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(
     null
   );
@@ -95,9 +96,7 @@ export default function FolderItem({
     setAnchorEl(null);
     setIsDialogEdit(false);
   };
-  const handleSubmitNewFolder = (value: any) => {
-    console.log("value", value);
-  };
+  const handleSubmitNewFolder = (value: any) => {};
   return (
     <div>
       <div className="items-center justify-between flex  bg-[#e8f5e8] rounded-[10px] cursor-pointer">
@@ -172,33 +171,47 @@ export default function FolderItem({
               {t("common.button.viewer")}
             </span>
           </div>
-          <div
-            onClick={() => {
-              setAnchorEl(null);
-              handleUpdateStar({
-                id: data.id,
-                star: !data.isStar,
-                type: "folder",
-              });
-            }}
-            className="w-[200pxx] flex items-center justify-start py-2 cursor-pointer hover:bg-[#F2F9ED] px-4 rounded-2xl"
-          >
-            {data.isStar ? (
+
+          {data.startIds.includes(profile?._id) ? (
+            <div
+              onClick={() => {
+                setAnchorEl(null);
+                handleUpdateStar({
+                  id: data.id,
+                  newValue: false,
+                  type: "folder",
+                });
+              }}
+              className="w-[200pxx] flex items-center justify-start py-2 cursor-pointer hover:bg-[#F2F9ED] px-4 rounded-2xl"
+            >
               <div className="flex items-center">
                 <StarIcon />
+                {data.startIds.includes(profile?._id)}
                 <span className="pl-3 text-[14px]">
                   {t("common.button.removeStar")}
                 </span>
               </div>
-            ) : (
+            </div>
+          ) : (
+            <div
+              onClick={() => {
+                setAnchorEl(null);
+                handleUpdateStar({
+                  id: data.id,
+                  newValue: true,
+                  type: "folder",
+                });
+              }}
+              className="w-[200pxx] flex items-center justify-start py-2 cursor-pointer hover:bg-[#F2F9ED] px-4 rounded-2xl"
+            >
               <div className="flex items-center">
                 <StarBorderIcon />
                 <span className="pl-3 text-[14px]">
                   {t("common.button.star")}
                 </span>
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       </Popover>
       <Dialog

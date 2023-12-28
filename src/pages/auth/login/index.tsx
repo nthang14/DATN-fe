@@ -8,7 +8,7 @@ import { useDispatch } from "react-redux";
 import { setNotify } from "~/app/slices/commonSlice";
 import ButtonCommon from "~/components/common/ButtonCommon";
 import { REGEX_EMAIL } from "~/utils/constants";
-import { saveAccessToken } from "~/utils/storage";
+import { saveAccessToken, saveProfile } from "~/utils/storage";
 import { useTranslations } from "next-intl";
 import "./style.scss";
 import InputHasValidate from "~/components/common/InputCommon/InputHasValidate";
@@ -43,6 +43,7 @@ export default function Login() {
 
     if (!!result && result?.data?.success) {
       saveAccessToken(result?.data?.data?.access_token || "");
+      saveProfile(result?.data?.data?.profile || {});
       dispatch(
         setNotify({
           isShowNotify: true,
@@ -53,7 +54,6 @@ export default function Login() {
       router.push("/");
       return;
     } else {
-      const data: any = result.data?.data;
       setError("password", {
         type: "manual",
         message: t("common.messages.msg002"),

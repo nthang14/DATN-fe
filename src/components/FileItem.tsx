@@ -12,7 +12,7 @@ import {
   DialogContent,
   DialogTitle,
 } from "@mui/material";
-import { readGoogleToken } from "~/utils/storage";
+import { readGoogleToken, readProfile } from "~/utils/storage";
 import defaultThumbnail from "~/assets/images/default-thumbnail.jpg";
 import StarBorderIcon from "@mui/icons-material/StarBorder";
 import StarIcon from "@mui/icons-material/Star";
@@ -72,6 +72,8 @@ export default function FileItem({
     getThumbnail();
   }, []);
   const t = useTranslations();
+  const profile = readProfile();
+
   const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(
     null
   );
@@ -108,7 +110,6 @@ export default function FileItem({
     setAnchorEl(null);
   };
   const handleDoSubmitEdit = (value: any) => {
-    console.log("value", value);
     handleRename({
       type: "file",
       id: data.id,
@@ -201,19 +202,44 @@ export default function FileItem({
             }
             className="w-[200pxx] flex items-center justify-start py-2 cursor-pointer hover:bg-[#F2F9ED] px-4 rounded-2xl"
           >
-            {data.isStar ? (
-              <div className="flex items-center">
-                <StarIcon />
-                <span className="pl-3 text-[14px]">
-                  {t("common.button.removeStar")}
-                </span>
+            {data.startIds.includes(profile?._id) ? (
+              <div
+                onClick={() => {
+                  setAnchorEl(null);
+                  handleUpdateStar({
+                    id: data.id,
+                    newValue: false,
+                    type: "file",
+                  });
+                }}
+                className="w-[200pxx] flex items-center justify-start py-2 cursor-pointer hover:bg-[#F2F9ED] px-4 rounded-2xl"
+              >
+                <div className="flex items-center">
+                  <StarIcon />
+                  {data.startIds.includes(profile?._id)}
+                  <span className="pl-3 text-[14px]">
+                    {t("common.button.removeStar")}
+                  </span>
+                </div>
               </div>
             ) : (
-              <div className="flex items-center">
-                <StarBorderIcon />
-                <span className="pl-3 text-[14px]">
-                  {t("common.button.star")}
-                </span>
+              <div
+                onClick={() => {
+                  setAnchorEl(null);
+                  handleUpdateStar({
+                    id: data.id,
+                    newValue: true,
+                    type: "file",
+                  });
+                }}
+                className="w-[200pxx] flex items-center justify-start py-2 cursor-pointer hover:bg-[#F2F9ED] px-4 rounded-2xl"
+              >
+                <div className="flex items-center">
+                  <StarBorderIcon />
+                  <span className="pl-3 text-[14px]">
+                    {t("common.button.star")}
+                  </span>
+                </div>
               </div>
             )}
           </div>

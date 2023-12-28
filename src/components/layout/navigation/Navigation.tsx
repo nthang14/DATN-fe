@@ -28,6 +28,9 @@ import { useUploadFileMutation } from "~/app/services/fileService";
 import { useDispatch } from "react-redux";
 import { setNotify, setIsReload } from "~/app/slices/commonSlice";
 import StarBorderIcon from "@mui/icons-material/StarBorder";
+import { useGetTotalSizeQuery } from "~/app/services/fileService";
+import { convertByte } from "~/utils/helpers";
+
 export default function Navigation() {
   const [createFolder] = useCreateFolderMutation();
   const [uploadFile] = useUploadFileMutation();
@@ -44,6 +47,7 @@ export default function Navigation() {
   } = useForm({
     mode: "onChange",
   });
+  const fetchTotalSize = useGetTotalSizeQuery({});
   const menus = [
     {
       key: "home",
@@ -222,6 +226,18 @@ export default function Navigation() {
             </div>
           );
         })}
+        <ListItemText className="pl-3">
+          <div className="text-sm font-medium text-[14px] text-neutral">
+            <div>
+              Tổng bộ nhớ đã dùng:
+              {convertByte(
+                fetchTotalSize?.data && fetchTotalSize?.data.length > 0
+                  ? fetchTotalSize?.data[0]?.totalByte
+                  : 0
+              )}
+            </div>
+          </div>
+        </ListItemText>
       </List>
       <Dialog open={isDialog} onClose={handleClose}>
         <DialogTitle>

@@ -46,7 +46,6 @@ instance.interceptors.response.use(
     return response;
   },
   async (error: any) => {
-    console.log(error)
     if (
       error?.response &&
       error?.response?.status === 498

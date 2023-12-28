@@ -30,7 +30,6 @@ export const folderServiceApi = createApi({
     }),
     sharingPermissions: builder.mutation({
       query: (payload) => {
-        console.log(payload);
         return {
           url: `/folders/${payload.id}/sharing`,
           method: "PUT",
@@ -43,7 +42,14 @@ export const folderServiceApi = createApi({
         return {
           url: `/folders/${payload.id}/star`,
           method: "PUT",
-          body: { isStar: payload.star },
+        };
+      },
+    }),
+    removeStarFolder: builder.mutation({
+      query: (payload) => {
+        return {
+          url: `/folders/${payload.id}/remove-star`,
+          method: "PUT",
         };
       },
     }),
@@ -84,5 +90,6 @@ export const {
   useDeleteFolderMutation,
   useUpdateStarFolderMutation,
   useRemovePermissionsFolderMutation,
-  useUpdateFolderMutation
+  useUpdateFolderMutation,
+  useRemoveStarFolderMutation
 } = folderServiceApi;

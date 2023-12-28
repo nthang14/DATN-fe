@@ -5,6 +5,7 @@ import {
   useDeleteFolderMutation,
   useUpdateStarFolderMutation,
   useRemovePermissionsFolderMutation,
+  useUpdateFolderMutation,
 } from "~/app/services/folderService";
 import {
   useGetFileByOwnerQuery,
@@ -13,6 +14,7 @@ import {
   useSharingPermissionsFileMutation,
   useUpdateStarMutation,
   useRemovePermissionsFileMutation,
+  useUpdateFileMutation,
 } from "~/app/services/fileService";
 import LayoutGrid from "~/components/layout/LayoutGrid";
 import FolderItem from "~/components/FolderItem";
@@ -150,6 +152,8 @@ export default function Home() {
   const [sharingPermissionsFile] = useSharingPermissionsFileMutation();
   const [deleteFile] = useDeleteFileMutation();
   const [updateStar] = useUpdateStarMutation();
+  const [updateFolder] = useUpdateFolderMutation();
+  const [updateFile] = useUpdateFileMutation();
   useEffect(() => {
     if (isReload) {
       if (isOwner) {
@@ -348,6 +352,43 @@ export default function Home() {
       }
     }
   };
+  const handleRename = async (data: any) => {
+    if (data?.type === "folder") {
+      const result = await updateFolder({
+        id: data.id,
+        data: data.data,
+      });
+      if (!!result) {
+        dispatch(
+          setNotify({
+            isShowNotify: true,
+            notifyContent: t("common.messages.msg012"),
+            typeAlert: "success",
+          })
+        );
+        fetchFolders.refetch();
+        fetFoldersShareMe.refetch();
+      }
+      return;
+    }
+    if (data?.type === "file") {
+      const result = await updateFile({
+        id: data.id,
+        data: data.data,
+      });
+      if (!!result) {
+        dispatch(
+          setNotify({
+            isShowNotify: true,
+            notifyContent: t("common.messages.msg012"),
+            typeAlert: "success",
+          })
+        );
+        fetchFiles.refetch();
+        fetchFilesShareMe.refetch();
+      }
+    }
+  };
   return (
     <div>
       <LayoutGrid />
@@ -392,6 +433,7 @@ export default function Home() {
                         handleOpenSelect={handleOpenSelect}
                         handleStar={handleUpdateStar}
                         handleRemoveSharing={handleRemoveSharing}
+                        handleRename={handleRename}
                       />
                     </div>
                   );
@@ -425,6 +467,7 @@ export default function Home() {
                         handleOpenSelect={handleOpenSelect}
                         handleStar={handleUpdateStar}
                         handleRemoveSharing={handleRemoveSharing}
+                        handleRename={handleRename}
                       />
                     </div>
                   );

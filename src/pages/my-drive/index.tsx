@@ -5,6 +5,7 @@ import {
   useDeleteFolderMutation,
   useUpdateStarFolderMutation,
   useRemovePermissionsFolderMutation,
+  useUpdateFolderMutation,
 } from "~/app/services/folderService";
 import {
   useGetFileByOwnerQuery,
@@ -13,6 +14,7 @@ import {
   useSharingPermissionsFileMutation,
   useUpdateStarMutation,
   useRemovePermissionsFileMutation,
+  useUpdateFileMutation,
 } from "~/app/services/fileService";
 import LayoutGrid from "~/components/layout/LayoutGrid";
 import FolderItem from "~/components/FolderItem";
@@ -147,6 +149,8 @@ export default function Home() {
   const [sharingPermissionsFile] = useSharingPermissionsFileMutation();
   const [deleteFile] = useDeleteFileMutation();
   const [updateStar] = useUpdateStarMutation();
+  const [updateFolder] = useUpdateFolderMutation();
+  const [updateFile] = useUpdateFileMutation();
   useEffect(() => {
     if (isReload) {
       fetchFolders.refetch();
@@ -259,7 +263,7 @@ export default function Home() {
   };
   const handleUpdateStar = async (data: any) => {
     if (data?.type === "folder") {
-      const result = await updateStarFolder({ id: data.id, star: data.star });
+      const result = await updateStarFolder({ id: data.id });
       if (!!result) {
         dispatch(
           setNotify({
@@ -273,7 +277,7 @@ export default function Home() {
       return;
     }
     if (data?.type === "file") {
-      const result = await updateStar({ id: data.id, star: data.star });
+      const result = await updateStar({ id: data.id });
       if (!!result) {
         dispatch(
           setNotify({
@@ -312,6 +316,41 @@ export default function Home() {
         payload: {
           userId: data.userId,
         },
+      });
+      if (!!result) {
+        dispatch(
+          setNotify({
+            isShowNotify: true,
+            notifyContent: t("common.messages.msg012"),
+            typeAlert: "success",
+          })
+        );
+        fetchFiles.refetch();
+      }
+    }
+  };
+  const handleRename = async (data: any) => {
+    if (data?.type === "folder") {
+      const result = await updateFolder({
+        id: data.id,
+        data: data.data,
+      });
+      if (!!result) {
+        dispatch(
+          setNotify({
+            isShowNotify: true,
+            notifyContent: t("common.messages.msg012"),
+            typeAlert: "success",
+          })
+        );
+        fetchFolders.refetch();
+      }
+      return;
+    }
+    if (data?.type === "file") {
+      const result = await updateFile({
+        id: data.id,
+        data: data.data,
       });
       if (!!result) {
         dispatch(
@@ -364,6 +403,7 @@ export default function Home() {
                         handleOpenSelect={handleOpenSelect}
                         handleStar={handleUpdateStar}
                         handleRemoveSharing={handleRemoveSharing}
+                        handleRename={handleRename}
                       />
                     </div>
                   );
@@ -384,6 +424,7 @@ export default function Home() {
                         handleOpenSelect={handleOpenSelect}
                         handleStar={handleUpdateStar}
                         handleRemoveSharing={handleRemoveSharing}
+                        handleRename={handleRename}
                       />
                     </div>
                   );

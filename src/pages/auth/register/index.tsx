@@ -1,14 +1,11 @@
-import { useAuthLoginMutation } from "~/app/services/authService";
 import { useRouter } from "next/router";
 import { useEffect, useState, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { IconButton, InputAdornment, Typography } from "@mui/material";
-import Image from "next/image";
 import { useDispatch } from "react-redux";
 import { setNotify } from "~/app/slices/commonSlice";
 import ButtonCommon from "~/components/common/ButtonCommon";
 import { REGEX_EMAIL } from "~/utils/constants";
-import { saveAccessToken } from "~/utils/storage";
 import { useTranslations } from "next-intl";
 import "./style.scss";
 import InputHasValidate from "~/components/common/InputCommon/InputHasValidate";
@@ -39,10 +36,16 @@ export default function Register() {
   const [register] = useRegisterMutation();
   const [isOutSide, setIsOutSide] = useState(false);
   const handleRegister = async (value: any) => {
-    const { fullName, username, password } = value;
+    const { fullName, username, password, phoneNumber, address } = value;
     if (isLoading) return;
     setIsLoading(true);
-    const result = await register({ fullName, username, password });
+    const result = await register({
+      fullName,
+      username,
+      password,
+      phoneNumber,
+      address,
+    });
     if (result) {
       dispatch(
         setNotify({
@@ -255,6 +258,42 @@ export default function Register() {
                     type="text"
                   />
                 </div>
+                <InputHasValidate
+                  control={control}
+                  name="phoneNumber"
+                  rules={{
+                    required: t("common.messages.msg001input", {
+                      field: t("register.payload.phoneNumber"),
+                    }),
+                    pattern: {
+                      value: /\d{10}$/im,
+                      message: t("common.messages.msg002"),
+                    },
+                  }}
+                  label={t("register.payload.phoneNumber")}
+                  error={errors.phoneNumber}
+                  inputProps={{
+                    style: { color: errors.phoneNumber && "#B33434" },
+                  }}
+                  maxLength={10}
+                  type="text"
+                />
+                <InputHasValidate
+                  control={control}
+                  name="address"
+                  rules={{
+                    required: t("common.messages.msg001input", {
+                      field: t("register.payload.address"),
+                    }),
+                  }}
+                  label={t("register.payload.address")}
+                  error={errors.address}
+                  inputProps={{
+                    style: { color: errors.address && "#B33434" },
+                  }}
+                  maxLength={256}
+                  type="text"
+                />
                 <div className="form-button">
                   <ButtonCommon
                     color="primary"

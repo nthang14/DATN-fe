@@ -16,14 +16,14 @@ export type InputType = {
   attribute?: any;
   maxLength?: number;
   multiline?: boolean;
-  maxRows?:number
+  maxRows?: number;
 };
 const InputHasValidate = ({ ...props }: InputType) => {
   return (
     <Controller
       name={props.name}
       control={props.control}
-      defaultValue=""
+      defaultValue={props.defaultValue}
       rules={props.rules}
       render={({ field }) => (
         <TextField
@@ -33,10 +33,6 @@ const InputHasValidate = ({ ...props }: InputType) => {
           {...field}
           defaultValue={props.defaultValue}
           type={props.type}
-          onKeyPress={(ev) => {
-            if (ev.ctrlKey && ev.key === 'Enter') {
-            }
-          }}
           onChange={(e: any) => {
             let value = e.target.value;
             if (!!props.maxLength) {

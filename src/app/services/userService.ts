@@ -16,7 +16,7 @@ export const userServiceApi = createApi({
       query: () => ({
         url: `/users`,
         method: "GET",
-        params: {limit: 100000},
+        params: { limit: 100000 },
       }),
     }),
     register: builder.mutation({
@@ -25,8 +25,28 @@ export const userServiceApi = createApi({
         method: "POST",
         body: payload,
       }),
-    })
+    }),
+    updateProfile: builder.mutation({
+      query: (payload) => ({
+        url: `/users`,
+        method: "PUT",
+        body: payload,
+      }),
+    }),
+    changePassword: builder.mutation({
+      query: (payload) => ({
+        url: `/users/change-password`,
+        method: "PUT",
+        body: payload,
+      }),
+    }),
   }),
 });
 
-export const { useGetUsersQuery, useGetUsersNoParamsQuery, useRegisterMutation } = userServiceApi;
+export const {
+  useGetUsersQuery,
+  useGetUsersNoParamsQuery,
+  useRegisterMutation,
+  useUpdateProfileMutation,
+  useChangePasswordMutation
+} = userServiceApi;

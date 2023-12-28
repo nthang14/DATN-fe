@@ -25,7 +25,8 @@
       "viewer": "Viewer",
       "star": "Star",
       "removeStar": "Remove the asterisk",
-      "rename": "Rename"
+      "rename": "Rename",
+      "edit": "Edit Profile"
     },
     "paging": "{range1} to {range2} out of items",
     "paging_with_total": "{range1} to {range2} out of {total} items",
@@ -45,7 +46,9 @@
       "msg009": "Delete successfully",
       "msg010": "Password don't match",
       "msg011": "Register successfully!",
-      "msg012": "Update star successfully!"
+      "msg012": "Update star successfully!",
+      "msg013": "Change password successfully!",
+      "msg014": "Update profile successfully!"
     }
   },
   "login": {
@@ -63,7 +66,8 @@
     "title": "Member Register",
     "payload": {
       "fullName": "Full name",
-
+      "phoneNumber": "Phone Number",
+      "address": "Address",
       "username": "Username",
       "password": "Password",
       "confirmPassword": "Confirm Password"
@@ -72,6 +76,19 @@
     "logout": "Log Out",
     "login": "You have account ?"
   },
+  "myProfile": {
+    "title": "My Profile",
+    "payload": {
+      "fullName": "Full name",
+      "username": "Username",
+      "phoneNumber": "Phone Number",
+      "address": "Address"
+    },
+    "button": "Submit",
+    "logout": "Log Out",
+    "login": "You have account ?"
+  },
+  "changePassword": "Change Password",
   "nav": {
     "home": "Home",
     "myDrive": "My Drive",

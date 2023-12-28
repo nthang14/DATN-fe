@@ -31,6 +31,12 @@ export const fileServiceApi = createApi({
         params: params,
       }),
     }),
+    getTotalSize: builder.query({
+      query: () => ({
+        url: `/files/total-byte`,
+        method: "GET",
+      }),
+    }),
     sharingPermissionsFile: builder.mutation({
       query: (payload) => {
         return {
@@ -49,6 +55,15 @@ export const fileServiceApi = createApi({
         };
       },
     }),
+    removeStart: builder.mutation({
+      query: (payload) => {
+        return {
+          url: `/files/${payload.id}/remove-star`,
+          method: "PUT",
+          body: {isStar: payload.star},
+        };
+      },
+    }),
     deleteFile: builder.mutation({
       query: (id: string) => {
         return {
@@ -59,7 +74,6 @@ export const fileServiceApi = createApi({
     }),
     removePermissionsFile: builder.mutation({
       query: (payload) => {
-        console.log(payload)
         return {
           url: `/files/${payload.id}/remove`,
           method: "PUT",
@@ -87,5 +101,7 @@ export const {
   useSharingPermissionsFileMutation,
   useUpdateStarMutation,
   useRemovePermissionsFileMutation,
-  useUpdateFileMutation
+  useUpdateFileMutation,
+  useRemoveStartMutation,
+  useGetTotalSizeQuery
 } = fileServiceApi;

@@ -6,6 +6,7 @@ import {
   useUpdateStarFolderMutation,
   useRemovePermissionsFolderMutation,
   useUpdateFolderMutation,
+  useRemoveStarFolderMutation,
 } from "~/app/services/folderService";
 import {
   useGetFileByOwnerQuery,
@@ -15,6 +16,7 @@ import {
   useUpdateStarMutation,
   useRemovePermissionsFileMutation,
   useUpdateFileMutation,
+  useRemoveStartMutation,
 } from "~/app/services/fileService";
 import LayoutGrid from "~/components/layout/LayoutGrid";
 import FolderItem from "~/components/FolderItem";
@@ -154,6 +156,8 @@ export default function Home() {
   const [updateStar] = useUpdateStarMutation();
   const [updateFolder] = useUpdateFolderMutation();
   const [updateFile] = useUpdateFileMutation();
+  const [removeStarFolder] = useRemoveStarFolderMutation();
+  const [removeStar] = useRemoveStartMutation();
 
   useEffect(() => {
     if (isReload) {
@@ -282,32 +286,63 @@ export default function Home() {
   };
   const handleUpdateStar = async (data: any) => {
     if (data?.type === "folder") {
-      const result = await updateStarFolder({ id: data.id, star: data.star });
-      if (!!result) {
-        dispatch(
-          setNotify({
-            isShowNotify: true,
-            notifyContent: t("common.messages.msg012"),
-            typeAlert: "success",
-          })
-        );
-        fetchFolders.refetch();
-        fetFoldersShareMe.refetch();
+      if (data.newValue) {
+        const result = await updateStarFolder({ id: data.id });
+        if (!!result) {
+          dispatch(
+            setNotify({
+              isShowNotify: true,
+              notifyContent: t("common.messages.msg012"),
+              typeAlert: "success",
+            })
+          );
+          fetchFolders.refetch();
+          fetFoldersShareMe.refetch();
+        }
+      } else {
+        const result = await removeStarFolder({ id: data.id });
+        if (!!result) {
+          dispatch(
+            setNotify({
+              isShowNotify: true,
+              notifyContent: t("common.messages.msg012"),
+              typeAlert: "success",
+            })
+          );
+          fetchFolders.refetch();
+          fetFoldersShareMe.refetch();
+        }
       }
+
       return;
     }
     if (data?.type === "file") {
-      const result = await updateStar({ id: data.id, star: data.star });
-      if (!!result) {
-        dispatch(
-          setNotify({
-            isShowNotify: true,
-            notifyContent: t("common.messages.msg012"),
-            typeAlert: "success",
-          })
-        );
-        fetchFiles.refetch();
-        fetchFilesShareMe.refetch();
+      if (data.newValue) {
+        const result = await updateStar({ id: data.id });
+        if (!!result) {
+          dispatch(
+            setNotify({
+              isShowNotify: true,
+              notifyContent: t("common.messages.msg012"),
+              typeAlert: "success",
+            })
+          );
+          fetchFiles.refetch();
+          fetchFilesShareMe.refetch();
+        }
+      } else {
+        const result = await removeStar({ id: data.id });
+        if (!!result) {
+          dispatch(
+            setNotify({
+              isShowNotify: true,
+              notifyContent: t("common.messages.msg012"),
+              typeAlert: "success",
+            })
+          );
+          fetchFiles.refetch();
+          fetchFilesShareMe.refetch();
+        }
       }
     }
   };
